@@ -1,0 +1,56 @@
+// import pino from 'pino'
+
+// const dest = (pino as any).extreme();
+// const logger = pino(dest);
+// setInterval(()=>logger.flush()).unref();
+// export default logger;
+
+import { levels } from 'pino';
+import winston from 'winston';
+
+const {cli, timestamp, combine, json, printf, colorize, align} = winston.format;
+
+const filterEvents = winston.format((info, opts)=> info.level === 'audit' ? info : false);
+
+const logLevels = {
+    fatal: 0,
+    error: 1,
+    warn: 2,
+    audit: 3,
+    info: 4,
+    debug: 5,
+};  
+
+const logger = winston.createLogger({
+    levels: logLevels,
+    level: process.env.LOG_LEVEL || 'info',
+    format: combine(
+        timestamp(), 
+        align(),
+        printf(info => `[${info.timestamp}] ${info.level}: ${info.message}`)),
+    transports: [
+        new winston.transports.Console({
+            format: combine(
+                timestamp(), 
+                align(),
+                printf(info => `[${info.timestamp}] ${info.level}: ${info.message}`)),
+        }),
+        new winston.transports.File({
+            format: combine(
+                timestamp(), 
+                align(),
+                printf(info => `[${info.timestamp}] ${info.level}: ${info.message}`)),
+            filename: 'logs/app.log',
+        }),
+        new winston.transports.File({
+            format: combine(
+                filterEvents(),
+                json()
+            ),
+            filename: 'logs/audit.log',
+        }),
+    ],
+});
+
+export const audit = (type: string) => logger.child({event: type});
+export default logger;
