@@ -2,7 +2,13 @@
   "name": "discord-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./build/main.js",
+  "module": "./build/main.mjs",
+  "types": "./build/main.d.ts",
+  "files": [
+    "build"
+  ],
+  "bin": "./build/main.js",
   "scripts": {
     "start": "tsx src/main.ts",
     "build": "tsup",

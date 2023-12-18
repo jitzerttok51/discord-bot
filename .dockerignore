@@ -1,0 +1,10 @@
+build
+infrastructure
+.git
+.gitignore
+node_modules
+build
+.env
+logs
+Dockerfile
+docker-compose.yaml

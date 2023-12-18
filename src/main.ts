@@ -1,3 +1,5 @@
+#!/bin/env node
+
 import { Client } from 'discord.js';
 import dotenv from 'dotenv';
 import { logVoiceChannelMigrations } from './audit/voice';
