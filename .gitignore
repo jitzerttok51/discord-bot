@@ -131,3 +131,5 @@ dist
 
 build
 .env
+infrastructure
+.vscode
