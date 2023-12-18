@@ -7,7 +7,7 @@ import logger from './logger';
 
 dotenv.config();
 
-const { DISCORD_TOKEN, DISCORD_CLIENT_ID } = process.env;
+const { DISCORD_TOKEN, DISCORD_CLIENT_ID, WORKSPACE } = process.env;
 
 if(!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
     throw new Error("Missing enviroment variables!");
@@ -15,7 +15,8 @@ if(!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
 
 export const config = {
     DISCORD_TOKEN,
-    DISCORD_CLIENT_ID
+    DISCORD_CLIENT_ID,
+    WORKSPACE: WORKSPACE ? WORKSPACE : "./"
 };
 
 const client = new Client({ intents: ["Guilds", "GuildMessages", "DirectMessages", "GuildVoiceStates"] });

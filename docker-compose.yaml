@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  discord-bot:
+    image: ghcr.io/jitzerttok51/discord-bot:${VERSION}
+    container_name: discord-bot
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      LOG_LEVEL: info
+      WORKSPACE: /root/workspace
+    stdin_open: true
+    volumes:
+      - "/root/workspace:/root/workspace"

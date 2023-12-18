@@ -7,6 +7,9 @@
 
 import { levels } from 'pino';
 import winston from 'winston';
+import {join} from 'path'
+import dotenv from 'dotenv';
+import { config } from './main';
 
 const {cli, timestamp, combine, json, printf, colorize, align} = winston.format;
 
@@ -21,6 +24,11 @@ const logLevels = {
     debug: 5,
 };  
 
+dotenv.config();
+
+let WORKSPACE = process.env.WORKSPACE
+WORKSPACE = WORKSPACE ? WORKSPACE : "./"
+console.log(join(WORKSPACE, 'logs/app.log'));
 const logger = winston.createLogger({
     levels: logLevels,
     level: process.env.LOG_LEVEL || 'info',
@@ -40,14 +48,14 @@ const logger = winston.createLogger({
                 timestamp(), 
                 align(),
                 printf(info => `[${info.timestamp}] ${info.level}: ${info.message}`)),
-            filename: 'logs/app.log',
+            filename: join(WORKSPACE, 'logs/app.log'),
         }),
         new winston.transports.File({
             format: combine(
                 filterEvents(),
                 json()
             ),
-            filename: 'logs/audit.log',
+            filename: join(WORKSPACE, 'logs/audit.log'),
         }),
     ],
 });

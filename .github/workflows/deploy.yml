@@ -1,0 +1,63 @@
+name: Deploy Bot Image
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'the image tag to deploy. Default to latest'
+        default: latest
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Copy docker-compose.yaml
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ vars.BOT_HOST }}
+          username: root
+          key: ${{ secrets.BOT_HOST_KEY }}
+          source: "./docker-compose.yaml"
+          target: "/root"
+
+      - name: Create ENV file
+        run: |
+          echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> .env
+          echo "DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}" >> .env
+          echo "VERSION=${VERSION}" >> .env
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+          VERSION: ${{ inputs.version }}
+      
+      - name: Copy .env file
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ vars.BOT_HOST }}
+          username: root
+          key: ${{ secrets.BOT_HOST_KEY }}
+          source: "./.env"
+          target: "/root"
+      
+      - name: Docker Login
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ vars.BOT_HOST }}
+          username: root
+          key: ${{ secrets.BOT_HOST_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker-compose --env-file .env up -d --force-recreate

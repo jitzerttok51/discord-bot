@@ -1,4 +1,4 @@
-name: Docker
+name: Publish Bot Image
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -6,7 +6,18 @@ name: Docker
 # documentation.
 
 on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'infrastructure'
+      - '.github'
+    
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'the image tag to deploy. Default to 1.0.github.run_number'
+        default: XXX
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -14,19 +25,22 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
 
     steps:
+      - name: Determine version
+        id: calc_version
+        run: |
+          [[ $RAW_VERSION -eq 0 ]] && echo "version=$RUN_NUMBER" >> $GITHUB_OUTPUT || echo "version=$RUN_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          RAW_VERSION: ${{ inputs.version }}
+          RUN_NUMBER: 1.0.${{ github.run_number }}
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -53,7 +67,17 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:1.0.${{ github.run_number }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.calc_version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build and push Docker image for main
+        if: github.ref == 'refs/heads/main'
+        id: build-and-push-main
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
