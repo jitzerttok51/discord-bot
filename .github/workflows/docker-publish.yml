@@ -65,6 +65,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
+          build-args: |
+            version=${{ steps.calc_version.outputs.version }}
           context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.calc_version.outputs.version }}
@@ -76,6 +78,8 @@ jobs:
         id: build-and-push-main
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
+          build-args: |
+            version=${{ steps.calc_version.outputs.version }}
           context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

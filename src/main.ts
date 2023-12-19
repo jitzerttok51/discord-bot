@@ -7,7 +7,7 @@ import logger from './logger';
 
 dotenv.config();
 
-const { DISCORD_TOKEN, DISCORD_CLIENT_ID, WORKSPACE } = process.env;
+const { DISCORD_TOKEN, DISCORD_CLIENT_ID, WORKSPACE, VERSION } = process.env;
 
 if(!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
     throw new Error("Missing enviroment variables!");
@@ -16,11 +16,12 @@ if(!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
 export const config = {
     DISCORD_TOKEN,
     DISCORD_CLIENT_ID,
-    WORKSPACE: WORKSPACE ? WORKSPACE : "./"
+    WORKSPACE: WORKSPACE ? WORKSPACE : "./",
+    VERSION: VERSION ? VERSION : "1.0.0"
 };
 
 const client = new Client({ intents: ["Guilds", "GuildMessages", "DirectMessages", "GuildVoiceStates"] });
-client.on("ready", () => console.log("Discord bot is ready!"));
+client.on("ready", () => console.log(`Discord bot version ${config.VERSION} is ready!`));
 
 client.on("voiceStateUpdate", (oldState, newState) => {
     logVoiceChannelMigrations(oldState, newState);
