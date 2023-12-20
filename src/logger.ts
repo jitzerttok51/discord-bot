@@ -26,9 +26,10 @@ const logLevels = {
 
 dotenv.config();
 
-let WORKSPACE = process.env.WORKSPACE
-WORKSPACE = WORKSPACE ? WORKSPACE : "./"
-console.log(join(WORKSPACE, 'logs/app.log'));
+let WORKSPACE = process.env.WORKSPACE;
+WORKSPACE = WORKSPACE ? WORKSPACE : "./";
+export let auditLogFile = join(WORKSPACE, 'logs/audit.log');
+
 const logger = winston.createLogger({
     levels: logLevels,
     level: process.env.LOG_LEVEL || 'info',
@@ -55,7 +56,7 @@ const logger = winston.createLogger({
                 filterEvents(),
                 json()
             ),
-            filename: join(WORKSPACE, 'logs/audit.log'),
+            filename: auditLogFile,
         }),
     ],
 });

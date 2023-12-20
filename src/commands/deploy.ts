@@ -2,10 +2,12 @@ import { BaseGuild, REST, Routes } from "discord.js";
 import { config } from "../main";
 import logger from "../logger";
 import version from "./version";
+import audit from "./audit";
 
 const log = logger;
 export const commands = {
-    version
+    version,
+    audit
 };
 
 export async function deployCommands(guild: BaseGuild, rest: REST) {
