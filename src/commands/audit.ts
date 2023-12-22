@@ -29,26 +29,10 @@ const audit: Command = {
 
             let rawDays = interaction.options.getInteger("days");
             let days: number = rawDays ? rawDays : 0;
-            logger.info(`File ${auditLogFile}`)
+
             await fs.readFile(auditLogFile, {encoding: 'utf-8'}, async (err, data) => {
                 if(!err) {
-                    let entries = data.split("\n")
-                        .map(raw => raw.trim())
-                        .filter(raw => raw.length > 0)
-                        .map(raw => {
-                            return JSON.parse(raw) as AuditEntry
-                        })
-                        .filter(e=> filterByDays(e.timestamp, days))
-                        .map(entry=> `[${formatDateTime(entry.timestamp)}] ${entry.message}`);
-                    let groups = groupEntires(entries);
-                    if(groups.length === 0 || groups[0].length === 0) {
-                        await interaction.followUp("No events");
-                    } else {
-                        for(let group of groups) {
-                            await interaction.followUp(group.join("\n"));
-                        }
-                    }
-                    return interaction.followUp(`Found ${entries.length} entries`);
+                    return await parseAuditEvents(data, days, interaction);
                 } else {
                     logger.error(err);
                     return interaction.followUp(`Voice subcommand ${err.message}`);
@@ -58,6 +42,27 @@ const audit: Command = {
             return interaction.reply(`Invalid subcommand ${command}`);
         }
     }
+}
+
+async function parseAuditEvents(data: string, days: number, interaction: CommandInteraction) {
+    let entries = data.split("\n")
+    .map(raw => raw.trim())
+    .filter(raw => raw.length > 0)
+    .map(raw => JSON.parse(raw) as AuditEntry)
+    .map(entry => toBGTime(entry))
+    .filter(e=> filterByDays(e.timestamp, days))
+    .map(entry=> `[${formatDateTime(entry.timestamp)}] ${entry.message}`);
+
+    let groups = groupEntires(entries);
+    if(groups.length === 0 || groups[0].length === 0) {
+        return interaction.followUp("No events");
+    }
+
+    for(let group of groups) {
+        await interaction.followUp(group.join("\n"));
+    }
+
+    return interaction.followUp(`Found ${entries.length} entries`);
 }
 
 function groupEntires(entries: string[]) {
@@ -81,6 +86,14 @@ function filterByDays(raw: string, days: number) {
     let to = new Date(new Date().setDate(new Date().getDate() - days + 1));
     to.setHours(0); to.setMinutes(0); to.setSeconds(0); to.setMilliseconds(0);
     return date >= from && date <= to;
+}
+
+function toBGTime(entry: AuditEntry): AuditEntry {
+    const offest = 2 * 3600 * 1000;
+    return {
+        ...entry,
+        timestamp: new Date(new Date(entry.timestamp).getTime() + offest).toISOString(),
+    }
 }
 
 function formatDateTime(raw: string) {
