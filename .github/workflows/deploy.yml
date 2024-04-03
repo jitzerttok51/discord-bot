@@ -28,10 +28,10 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./docker-compose.yaml"
-          target: "/root"
+          target: "/home/ec2-user/dsbot"
 
       - name: Create ENV file
         run: |
@@ -47,17 +47,18 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./.env"
-          target: "/root"
+          target: "/home/ec2-user/dsbot"
       
       - name: Docker Login
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           script: |
+            cd /home/ec2-user/dsbot
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker-compose --env-file .env up -d --force-recreate
