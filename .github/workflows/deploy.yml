@@ -28,7 +28,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./docker-compose.yaml"
           target: "/root"
@@ -47,7 +47,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./.env"
           target: "/root"
@@ -56,7 +56,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ vars.BOT_HOST }}
-          username: root
+          username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
