@@ -31,7 +31,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./docker-compose.yaml"
-          target: "/root"
+          target: "/home/ec2-user"
 
       - name: Create ENV file
         run: |
@@ -50,7 +50,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.BOT_HOST_KEY }}
           source: "./.env"
-          target: "/root"
+          target: "/home/ec2-user"
       
       - name: Docker Login
         uses: appleboy/ssh-action@v0.1.10
